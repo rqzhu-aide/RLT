@@ -24,6 +24,7 @@ docs/
 
 # R project
 .Rproj.user/
+RLT.Rproj
 *.Rproj
 
 # Generated docs (roxygen2 regenerates these)
