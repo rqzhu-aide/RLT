@@ -1,64 +1,82 @@
-# RLT <img src="https://img.shields.io/badge/version-6.0.2-blue" alt="version"> <img src="https://img.shields.io/badge/license-GPL%20(%3E%3D%203)-green" alt="license">
+# RLT
 
-**Reinforcement Learning Trees** — high-performance random forests for R with C++/Rcpp backend.
+**Reinforcement Learning Trees** is an R package for random forest models with
+regression, classification, and survival analysis support. The package uses a
+C++/Rcpp backend with OpenMP for parallel computation.
 
-> [Ruoqing Zhu](https://teazrq.github.io/) · CRAN: [v3.2.6](https://cran.r-project.org/web/packages/RLT/index.html)
+[Website](https://teazrq.github.io/RLT/) |
+[GitHub](https://github.com/teazrq/RLT) |
+[Issues](https://github.com/teazrq/RLT/issues)
 
----
+## Highlights
 
-### Highlights
+- Regression, classification, and survival forests
+- Reinforcement learning splits with embedded model guidance
+- Linear combination splits for multivariate split directions
+- Variable importance and random forest kernel utilities
+- Survival prediction, confidence bands, and tree inspection tools
+- Reproducible parallel fitting through recorded random seeds
 
-- **Three model types** — regression, classification, and survival (logrank, sup-logrank, Cox gradient splits)
-- **Linear combination (LC) splits** — SIR, LM, PCA, LDA, CoxPH-based multivariate splits across all models
-- **Reinforcement learning** — embedded trees with VI gating, variable muting, and tiered LC selection
-- **Variance estimation** — matched, infinitesimal jackknife (IJ), and jackknife variance for predictions
-- **Variable importance** — permutation importance with variance estimates (`$VarVI`); distribution-based importance
-- **Survival analysis** — Kaplan–Meier curves with confidence bands, distribution-based variable importance
-- **Parallel & reproducible** — bit-identical results across `ncores`
-- **326+ tests** across all models
+## Installation
 
-### Installation
+Install the released version from CRAN when available:
 
 ```r
-devtools::install_github("rqzhu-aide/RLT")
+install.packages("RLT")
 ```
 
-Requires: R ≥ 4.0, C++ compiler with OpenMP support.
+Install the development version from GitHub:
 
-### Quick Example
+```r
+# install.packages("remotes")
+remotes::install_github("teazrq/RLT")
+```
+
+On Windows, source installation requires Rtools. On macOS and Linux, source
+installation requires a working C++ toolchain and OpenMP support.
+
+## Quick Example
 
 ```r
 library(RLT)
 
-# Regression with variance
-fit <- RLT(x, y, model = "regression", ntrees = 500,
-           importance = TRUE, var.mode = "matched")
-pred <- predict(fit, x_test, var.mode = "matched")
-pred$Variance     # prediction variance
-fit$VarVI         # variable importance variance
+set.seed(1)
+n <- 200
+p <- 6
+x <- matrix(rnorm(n * p), n, p)
+y <- x[, 1] - x[, 2] + rnorm(n)
 
-# Survival with LC splits
-fit <- RLT(x, Y, C, model = "survival", ntrees = 500,
-           linear.comb = 3, linear.comb.method = "coxph")
+fit <- RLT(
+  x, y,
+  model = "regression",
+  ntrees = 100,
+  importance = TRUE,
+  verbose = FALSE
+)
 
-# Reinforcement learning
-fit <- RLT(x, y, model = "regression", ntrees = 500,
-           reinforcement = TRUE, linear.comb = 3,
-           linear.comb.method = "sir")
+pred <- predict(fit, x[1:5, ])
+pred$Prediction
+
+importance(fit)
 ```
 
-### Supported Models at a Glance
+## Documentation
 
-| Model | Split Rules | LC Methods | Variance |
-|-------|------------|------------|----------|
-| **Regression** | variance | naive, LM, PCA, SIR | matched, IJ, jackknife |
-| **Classification** | gini | LDA, naive, random, logistic | matched, IJ, jackknife |
-| **Survival** | logrank, sup-logrank, Cox gradient | CoxPH, naive | matched, IJ, jackknife |
+The pkgdown site is built from the package vignettes and website-only articles:
 
----
+- [Get Started](https://teazrq.github.io/RLT/articles/get-started.html)
+- [Regression Tutorial](https://teazrq.github.io/RLT/articles/regression-tutorial.html)
+- [Classification Tutorial](https://teazrq.github.io/RLT/articles/classification-tutorial.html)
+- [Survival Tutorial](https://teazrq.github.io/RLT/articles/survival-tutorial.html)
+- [Reference](https://teazrq.github.io/RLT/reference/index.html)
 
-### References
+## References
 
-- Zhu, R., Zeng, D., & Kosorok, M. R. (2015). Reinforcement Learning Trees. *JASA*, 110(512), 1770–1784. [DOI](https://doi.org/10.1080/01621459.2015.1036994)
-- Xu, T., Zhu, R., & Shao, X. (2024). On variance estimation of random forests with infinite-order U-statistics. *EJS*, 18(1), 2135–2207.
-- Formentini, S., Liang, K., & Zhu, R. (2022). Survival Function Confidence Band Estimation using Random Forests. [arXiv:2204.12038](https://arxiv.org/abs/2204.12038)
+- Zhu, R., Zeng, D., and Kosorok, M. R. (2015). Reinforcement Learning Trees.
+  *Journal of the American Statistical Association*, 110(512), 1770-1784.
+  <https://doi.org/10.1080/01621459.2015.1036994>
+- Xu, T., Zhu, R., and Shao, X. (2024). On variance estimation of random
+  forests with infinite-order U-statistics. *Electronic Journal of Statistics*,
+  18(1), 2135-2207.
+- Formentini, S., Liang, K., and Zhu, R. (2022). Survival Function Confidence
+  Band Estimation using Random Forests. <https://arxiv.org/abs/2204.12038>

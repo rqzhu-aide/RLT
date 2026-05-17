@@ -1,11 +1,21 @@
 ---
-title: "RLT Regression Tutorial"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{RLT Regression Tutorial}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+title: "Single Tree - Tutorial (RLT)"
+author: "Ruoqing Zhu"
+date: "Last Updated: `r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+    df_print: paged
+    toc: yes
+    toc_float:
+      collapsed: true
+      smooth_scroll: true 
+    toc_depth: '2'
+  pdf_document:
+    toc: yes
+    toc_depth: 2
 ---
+
 ```{r setup, include=FALSE}
 # Clean, consistent output for all chunks
 knitr::opts_chunk$set(
@@ -13,16 +23,11 @@ knitr::opts_chunk$set(
   fig.width = 7, fig.height = 5, out.width = "70%", fig.align = "center",
   collapse = TRUE, class.source = "fold-show"
 )
-library(RLT)
 ```
 
 ## Overview
 
-This page shows how to fit and predict a regression model with RLT.
-
-## Prerequisites
-
-Install RLT, then load it with `library(RLT)`.
+This page shows how to inspect a single tree grown inside an RLT forest using `get.one.tree()`.
 
 ## Data
 
@@ -30,7 +35,6 @@ We generate continuous and categorical predictors with a continuous outcome.
 
 ```{r data-prep}
 # (Optional) For reproducibility in this tutorial only.
-# Detailed notes on random seeds are in the Seed & Reproducibility feature page.
 set.seed(1)
 
 # ---- Generate a small synthetic dataset ----
@@ -43,10 +47,10 @@ p <- 10
 X1 <- matrix(rnorm(n * (p/2)), n, p/2)
 X2 <- matrix(as.integer(runif(n * (p/2)) * 3), n, p/2)  # integers 0,1,2
 
-X_numeric <- data.frame(X1, X2)
-
 # Continuous outcome with a simple signal + noise
-y <- 1 + rowSums(X_numeric[, 2:6]) + 2 * (X_numeric[, p/2 + 1] %in% c(1, 2)) + rnorm(n)
+X_numeric <- data.frame(X1, X2)
+y <- 1 + rowSums(X_numeric[, 2:6]) +
+  2 * (X_numeric[, p/2 + 1] %in% c(1, 2)) + rnorm(n)
 
 X <- X_numeric
 X[, (p/2 + 1):p] <- lapply(X[, (p/2 + 1):p], as.factor)
@@ -61,6 +65,9 @@ testY  <- y[(trainn + 1):(trainn + testn)]
 ## Fit
 
 ```{r fit-model}
+# install.packages("devtools"); devtools::install_github("teazrq/RLT")
+library(RLT)
+
 ntrees <- 200
 ncores <- 1
 nmin   <- 5
@@ -82,33 +89,12 @@ fit <- RLT(
 )
 ```
 
-## Predict
+## Inspect one tree
 
-```{r predict}
-pred <- predict(fit, testX, ncores = ncores)
+Use `get.one.tree(<fit>, <tree_id>)` to print a single tree.
+Choose `tree_id` from 1 to `ntrees` (here we take the first tree).
 
-# Helper in case predict() returns a list with $Prediction
-get_pred <- function(obj) if (is.list(obj) && !is.null(obj$Prediction)) obj$Prediction else as.numeric(obj)
-
-train_pred <- if (!is.null(fit$Prediction)) fit$Prediction else get_pred(predict(fit, trainX, ncores = ncores))
-test_pred  <- get_pred(pred)
-```
-
-## Evaluate
-
-```{r evaluate}
-mse_train <- mean((train_pred - trainY)^2)
-mse_test  <- mean((test_pred  - testY)^2)
-
-# A compact summary
-list(
-  Train_MSE = round(mse_train, 4),
-  Test_MSE  = round(mse_test, 4)
-)
-```
-
-## Inspect
-
-```{r inspect}
-print(fit)
+```{r inspect-tree}
+# Peek into a single tree
+get.one.tree(fit, 1)
 ```

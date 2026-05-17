@@ -1,72 +1,81 @@
-# RLT package pkgdown site configuration file
-# Version 1.2 - Reorganized tutorials (core vs features)
+# pkgdown site configuration for https://teazrq.github.io/RLT/
 
-# 1. Basic site information
-url: https://teazrq.github.io/RLT
+url: https://teazrq.github.io/RLT/
 
-# 2. Website appearance theme (using bslib)
 template:
   bootstrap: 5
   bslib:
-    preset: cosmo # A clean and professional theme
+    preset: cosmo
 
-# 3. Top navigation bar of the site
 navbar:
   type: default
   left:
     - text: "Get Started"
-      href: articles/Test-RLT.html
-    - text: "Reference"
-      href: reference/index.html
+      href: articles/get-started.html
     - text: "Tutorials"
       menu:
-        # Core modeling (minimal, ~100 obs)
         - text: "Regression"
-          href: articles/Test-Reg.html
+          href: articles/regression-tutorial.html
         - text: "Classification"
-          href: articles/Test-Cla.html
+          href: articles/classification-tutorial.html
         - text: "Survival"
-          href: articles/Test-Surv.html
-        # Features (split into separate pages)
-        - text: "Random Seed & Reproducibility"
-          href: articles/feature-seed.html   # 从现有 Rmd 中整理产出
+          href: articles/survival-tutorial.html
+        - text: "Survival Minimal"
+          href: articles/survival-minimal.html
+        - text: "Random Seed and Reproducibility"
+          href: articles/feature-seed.html
         - text: "Variable Importance"
-          href: articles/Variable-Importance.html
+          href: articles/variable-importance.html
         - text: "Single Tree"
-          href: articles/feature-single-tree.html  # 从现有 Rmd 中整理产出
+          href: articles/feature-single-tree.html
         - text: "Kernel"
-          href: articles/feature-kernel.html       # 从现有 Rmd 中整理产出
+          href: articles/feature-kernel.html
         - text: "Confidence Interval Estimation"
-          href: articles/Confidence-Interval.html
-        - text: "Reinforcement Learning Splitting Rule"
-          href: articles/rl_splitting_rule.html
-    - text: "Developing"
-      href: DEVELOPING.html
+          href: articles/confidence-interval.html
+        - text: "Reinforcement Splitting"
+          href: articles/reinforcement-splitting.html
+    - text: "Reference"
+      href: reference/index.html
     - text: "Changelog"
       href: news/index.html
   right:
     - icon: fa-github fa-lg
       href: https://github.com/teazrq/RLT
-      aria-label: GitHub # Fix for accessibility warning
+      aria-label: GitHub
 
-# 4. Function reference grouping and ordering
+articles:
+  - title: "Start Here"
+    contents:
+      - articles/get-started
+  - title: "Core Tutorials"
+    contents:
+      - regression-tutorial
+      - classification-tutorial
+      - survival-tutorial
+      - articles/survival-minimal
+  - title: "Feature Guides"
+    contents:
+      - articles/feature-seed
+      - articles/variable-importance
+      - articles/feature-single-tree
+      - articles/feature-kernel
+      - articles/confidence-interval
+      - articles/reinforcement-splitting
+
 reference:
   - title: "Core Modeling Functions"
-    desc: "Main functions used for building, predicting, and presenting RLT models. These are the most commonly used in the workflow."
+    desc: "Fit, predict, and print RLT models."
     contents:
       - RLT
       - predict.RLT
       - print.RLT
 
-  - title: "Model Analysis & Utilities"
-    desc: "Auxiliary functions for evaluating, interpreting, and analyzing fitted models."
+  - title: "Model Analysis and Utilities"
+    desc: "Inspect fitted models, variable importance, kernels, and survival bands."
     contents:
+      - importance
+      - print.importance.RLT
       - forest.kernel
       - get.one.tree
       - get.surv.band
       - cindex
-  
-  - title: "Other Functions"
-    desc: "Other auxiliary or testing functions."
-    contents:
-      - mytest

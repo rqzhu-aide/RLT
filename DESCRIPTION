@@ -34,7 +34,7 @@ Author: Ruoqing Zhu [aut, cre, cph] (<https://orcid.org/0000-0002-0753-5716>),
   Tianning Xu [ctb],
   Zhechao Huang [ctb]
 Maintainer: Ruoqing Zhu <teazrq@gmail.com>
-Suggests: testthat, knitr, mgcv
+Suggests: testthat, knitr, rmarkdown, mgcv
 VignetteBuilder: knitr
 License: GPL (>= 3)
 Encoding: UTF-8

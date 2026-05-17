@@ -1,7 +1,62 @@
-# Package specific flags
-PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
+PKG_CXXFLAGS = -DARMA_DONT_PRINT_ERRORS -DARMA_WARN_LEVEL=1 -I. -I./include $(SHLIB_OPENMP_CXXFLAGS)
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
-# source and object files
-SOURCES = $(wildcard *.cpp */*.cpp)
+SOURCES = \
+	RLT_init.cpp \
+	classification/Cla_Uni_0_Forest_Build.cpp \
+	classification/Cla_Uni_1_Split_A_Node.cpp \
+	classification/Cla_Uni_1_Split_A_Node_Embed.cpp \
+	classification/Cla_Uni_2_Find_A_Split.cpp \
+	classification/Cla_Uni_2_Find_A_Split_Embed.cpp \
+	classification/Cla_Uni_Comb_0_Forest_Build.cpp \
+	classification/Cla_Uni_Comb_1_Split_A_Node.cpp \
+	classification/Cla_Uni_Comb_2_Find_A_Split.cpp \
+	classification/internal/Cla_Uni_3_One_Split_Cat.cpp \
+	classification/internal/Cla_Uni_3_One_Split_Cont.cpp \
+	classification/internal/Cla_Uni_Comb_3_Linear_Split.cpp \
+	classification/internal/Cla_Uni_Pre_Screen.cpp \
+	core/Stat_Function.cpp \
+	core/Tree_Function.cpp \
+	core/Utility.cpp \
+	kernels/RFKernels.cpp \
+	quantile/Quan_Uni_0_Forest_Build.cpp \
+	quantile/Quan_Uni_1_Split_A_Node.cpp \
+	quantile/Quan_Uni_2_Find_A_Split.cpp \
+	quantile/internal/Quan_Uni_3_One_Split_Cont.cpp \
+	regression/Reg_Uni_0_Forest_Build.cpp \
+	regression/Reg_Uni_1_Split_A_Node.cpp \
+	regression/Reg_Uni_1_Split_A_Node_Embed.cpp \
+	regression/Reg_Uni_2_Find_A_Split.cpp \
+	regression/Reg_Uni_2_Find_A_Split_Embed.cpp \
+	regression/Reg_Uni_Comb_0_Forest_Build.cpp \
+	regression/Reg_Uni_Comb_1_Split_A_Node.cpp \
+	regression/Reg_Uni_Comb_2_Find_A_Split.cpp \
+	regression/internal/Reg_Uni_3_One_Split_Cat.cpp \
+	regression/internal/Reg_Uni_3_One_Split_Cont.cpp \
+	regression/internal/Reg_Uni_Comb_3_Linear_Split.cpp \
+	regression/internal/Reg_Uni_Pre_Screen.cpp \
+	r-interface/cindex.cpp \
+	r-interface/ClaUniCombForest.cpp \
+	r-interface/ClaUniForest.cpp \
+	r-interface/QuanUniForest.cpp \
+	r-interface/RBridge.cpp \
+	r-interface/RcppExports.cpp \
+	r-interface/RegUniCombForest.cpp \
+	r-interface/RegUniForest.cpp \
+	r-interface/SurvUniCombForest.cpp \
+	r-interface/SurvUniForest.cpp \
+	survival/Surv_Uni_0_Forest_Build.cpp \
+	survival/Surv_Uni_1_Split_A_Node.cpp \
+	survival/Surv_Uni_1_Split_A_Node_Embed.cpp \
+	survival/Surv_Uni_2_Find_A_Split.cpp \
+	survival/Surv_Uni_2_Find_A_Split_Embed.cpp \
+	survival/Surv_Uni_Comb_0_Forest_Build.cpp \
+	survival/Surv_Uni_Comb_1_Split_A_Node.cpp \
+	survival/Surv_Uni_Comb_2_Find_A_Split.cpp \
+	survival/internal/Surv_Uni_3_Logrank.cpp \
+	survival/internal/Surv_Uni_3_One_Split_Cat.cpp \
+	survival/internal/Surv_Uni_3_One_Split_Cont.cpp \
+	survival/internal/Surv_Uni_Comb_3_Linear_Split.cpp \
+	survival/internal/Surv_Uni_Pre_Screen.cpp
+
 OBJECTS = $(SOURCES:.cpp=.o)

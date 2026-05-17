@@ -5,7 +5,15 @@
 
 # R build/check artifacts
 *.Rcheck/
+.check-output/
 RLT_*.tar.gz
+.-00build.log
+RLT.pdf
+.rcheck-lib/
+.rcheck-Makevars.win
+
+# Generated pkgdown site output
+docs/
 
 # R session files
 .Rhistory
@@ -19,7 +27,7 @@ RLT_*.tar.gz
 *.Rproj
 
 # Generated docs (roxygen2 regenerates these)
-# man/ is kept tracked — only ignore inst/doc
+# man/ is kept tracked; only ignore inst/doc
 inst/doc
 
 # Test artifacts
@@ -44,3 +52,8 @@ ehthumbs.db
 
 # Backup files from patching
 *.orig
+*.save
+
+# Removed legacy/manual test folders
+OWLTest/
+Test_Files/

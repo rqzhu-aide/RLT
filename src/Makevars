@@ -2,6 +2,7 @@ PKG_CXXFLAGS = -DARMA_DONT_PRINT_ERRORS -DARMA_WARN_LEVEL=1 -I. -I./include $(SH
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
 SOURCES = \
+	RLT_init.cpp \
 	classification/Cla_Uni_0_Forest_Build.cpp \
 	classification/Cla_Uni_1_Split_A_Node.cpp \
 	classification/Cla_Uni_1_Split_A_Node_Embed.cpp \

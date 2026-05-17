@@ -296,11 +296,11 @@ check_control <- function(control, param)
               "var.mode" = var.mode))
 }
 
-check_resamplepreset <- function(resample.preset, param, param_control)
+check_resamplepreset <- function(resample.preset, param, param.control)
 {
 
   # for variance estimation
-  if (param_control$var.mode != "none")
+  if (param.control$var.mode != "none")
   {
     k = as.integer(param$resample.prob*param$n)
     resample.preset = gen_ms_obs_track_mat_cpp(param$n, k, param$ntrees, param$seed + 1)
