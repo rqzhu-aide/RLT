@@ -372,6 +372,9 @@ RLT <- function(x, y, censor = NULL, model = NULL,
   # check control parameters
   param.control = check_control(param.control, param)
 
+  # check importance feasibility (OOB size vs importance type)
+  check_importance_settings(importance, n, resample.replace, resample.prob)
+
   # reset some parameters if var.mode is needed
   if (param.control$var.mode != "none")
   {

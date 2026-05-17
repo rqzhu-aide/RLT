@@ -135,6 +135,48 @@ check_importance <- function(importance)
   return(importance.num)
 }
 
+check_importance_settings <- function(importance, n, resample.replace, resample.prob)
+{
+  if (importance == 0) return(invisible(NULL))
+  
+  # expected OOB size
+  oob_size <- n - as.integer(n * resample.prob)
+  
+  if (resample.replace)
+  {
+    # bootstrap always has OOB; just check n is not tiny
+    if (n < 3)
+      warning(sprintf(
+        "n = %d is very small; importance estimates may be unreliable.",
+        n), call. = FALSE)
+    return(invisible(NULL))
+  }
+  
+  # no replacement: OOB size is deterministic
+  if (importance == 1 && oob_size < 2)
+  {
+    warning(sprintf(
+      "Permutation importance requires at least 2 OOB observations per tree, but current settings yield only %d (n = %d, resample.prob = %.4f, resample.replace = FALSE). Importance calculation will be skipped. Consider increasing OOB by lowering resample.prob or using resample.replace = TRUE.",
+      oob_size, n, resample.prob), call. = FALSE)
+  }
+  
+  if (importance == 2 && oob_size < 1)
+  {
+    warning(sprintf(
+      "Distributed importance requires at least 1 OOB observation per tree, but current settings yield 0 (n = %d, resample.prob = %.4f, resample.replace = FALSE). Importance calculation will be skipped. Consider lowering resample.prob.",
+      n, resample.prob), call. = FALSE)
+  }
+  
+  if (importance == 2 && oob_size >= 1 && oob_size < 5)
+  {
+    warning(sprintf(
+      "Distributed importance with only %d OOB observation(s) per tree (n = %d, resample.prob = %.4f) may produce noisy estimates. Consider using more OOB samples (e.g., resample.prob = 0.632 with resample.replace = FALSE).",
+      oob_size, n, resample.prob), call. = FALSE)
+  }
+  
+  invisible(NULL)
+}
+
 
 check_reinforcement <- function(reinforcement)
 {
