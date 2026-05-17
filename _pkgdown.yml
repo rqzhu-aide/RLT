@@ -20,20 +20,18 @@ navbar:
           href: articles/classification-tutorial.html
         - text: "Survival"
           href: articles/survival-tutorial.html
-        - text: "Survival Minimal"
-          href: articles/survival-minimal.html
+        - text: "RLT with Linear Combinations"
+          href: articles/linear-combinations.html
         - text: "Random Seed and Reproducibility"
           href: articles/feature-seed.html
-        - text: "Variable Importance"
+        - text: "Variable Importance (Permutation and Distributed)"
           href: articles/variable-importance.html
+        - text: "Random Forest Kernel"
+          href: articles/feature-kernel.html
         - text: "Single Tree"
           href: articles/feature-single-tree.html
-        - text: "Kernel"
-          href: articles/feature-kernel.html
-        - text: "Confidence Interval Estimation"
+        - text: "Confidence Interval and Confidence Band"
           href: articles/confidence-interval.html
-        - text: "Reinforcement Splitting"
-          href: articles/reinforcement-splitting.html
     - text: "Reference"
       href: reference/index.html
     - text: "Changelog"
@@ -47,20 +45,17 @@ articles:
   - title: "Start Here"
     contents:
       - articles/get-started
-  - title: "Core Tutorials"
+  - title: "Tutorials"
     contents:
       - regression-tutorial
       - classification-tutorial
       - survival-tutorial
-      - articles/survival-minimal
-  - title: "Feature Guides"
-    contents:
+      - articles/linear-combinations
       - articles/feature-seed
       - articles/variable-importance
-      - articles/feature-single-tree
       - articles/feature-kernel
+      - articles/feature-single-tree
       - articles/confidence-interval
-      - articles/reinforcement-splitting
 
 reference:
   - title: "Core Modeling Functions"

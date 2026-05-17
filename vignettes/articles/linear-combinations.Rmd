@@ -1,0 +1,94 @@
+---
+title: "RLT with Linear Combinations"
+author: "Ruoqing Zhu"
+date: "Last Updated: `r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    code_folding: hide
+    df_print: paged
+    toc: yes
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+    toc_depth: '2'
+  pdf_document:
+    toc: yes
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, warning = FALSE,
+  fig.width = 7, fig.height = 5, out.width = "70%", fig.align = "center",
+  collapse = TRUE, class.source = "fold-show"
+)
+```
+
+## Overview
+
+Linear-combination splits allow each internal node to split on a weighted combination of several variables rather than a single predictor. This can help when the signal is carried by a direction such as `X1 + X2` instead of one coordinate at a time.
+
+The example below uses regression. The same idea can also be applied to classification and survival forests by setting `model = "classification"` or `model = "survival"` and choosing a model-appropriate `linear.comb.method`.
+
+## Regression Example
+
+```{r regression-data}
+set.seed(3)
+
+n <- 160
+p <- 6
+X <- matrix(rnorm(n * p), n, p)
+colnames(X) <- paste0("X", seq_len(p))
+
+y <- 1 + X[, 1] + X[, 2] + 0.5 * X[, 3] + rnorm(n, sd = 0.5)
+
+train_id <- 1:120
+trainX <- X[train_id, ]
+trainY <- y[train_id]
+testX <- X[-train_id, ]
+testY <- y[-train_id]
+```
+
+Fit a regression forest that considers three-variable linear combinations at a split.
+
+```{r linear-combination-fit}
+library(RLT)
+
+fit_lc <- RLT(
+  trainX, trainY,
+  model = "regression",
+  ntrees = 200,
+  nmin = 5,
+  mtry = 3,
+  split.gen = "random",
+  nsplit = 3,
+  linear.comb = 3,
+  linear.comb.method = "sir",
+  ncores = 1,
+  verbose = FALSE
+)
+
+print(fit_lc)
+```
+
+## Prediction
+
+```{r linear-combination-predict}
+pred <- predict(fit_lc, testX, ncores = 1)
+test_pred <- if (is.list(pred) && !is.null(pred$Prediction)) {
+  pred$Prediction
+} else {
+  as.numeric(pred)
+}
+
+list(
+  Test_MSE = round(mean((test_pred - testY)^2), 4),
+  Linear_Combination_Size = fit_lc$parameters$linear.comb
+)
+```
+
+## Other Model Types
+
+For classification, use `model = "classification"` with methods such as `"lda"`, `"naive"`, `"random"`, or `"logistic"`.
+
+For survival, use `model = "survival"` with methods such as `"coxph"` or `"naive"`.

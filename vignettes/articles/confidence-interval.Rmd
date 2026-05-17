@@ -1,5 +1,5 @@
 ---
-title: "Confidence Interval / Band - Survival Tutorial (RLT)"
+title: "Confidence Interval and Confidence Band - Survival Tutorial (RLT)"
 author: "Ruoqing Zhu"
 date: "Last Updated: `r format(Sys.time(), '%B %d, %Y')`"
 output:

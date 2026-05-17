@@ -1,5 +1,5 @@
 ---
-title: "Variable Importance - Tutorial (RLT)"
+title: "Variable Importance (Permutation and Distributed) - Tutorial (RLT)"
 author: "Ruoqing Zhu"
 date: "Last Updated: `r format(Sys.time(), '%B %d, %Y')`"
 output:
@@ -62,7 +62,7 @@ testX  <- X[(trainn + 1):(trainn + testn), ]
 testY  <- y[(trainn + 1):(trainn + testn)]
 ```
 
-## Option A — Permutation importance
+## Option A - Permutation Importance
 
 Set `importance` to enable permutation-based VI during training.
 
@@ -105,7 +105,7 @@ barplot(
 )
 ```
 
-## Option B — Distributed assignment importance (leave-one-oob style)
+## Option B - Distributed Assignment Importance
 
 This configuration assigns importance using distributed attribution with OOB tracking. Use `importance = "distribute"` for distributed assignment importance.
 ```{r dist-importance}
