@@ -1,9 +1,46 @@
-.Rproj.user
+# Compiled object files
+*.o
+*.so
+*.dll
+
+# R build/check artifacts
+*.Rcheck/
+RLT_*.tar.gz
+
+# R session files
 .Rhistory
 .RData
+.RDataTmp
 .Ruserdata
-src/*.o
-src/*.so
-src/*.dll
-*.so
-*.o
+.Rapp.history
+
+# R project
+.Rproj.user/
+*.Rproj
+
+# Generated docs (roxygen2 regenerates these)
+# man/ is kept tracked — only ignore inst/doc
+inst/doc
+
+# Test artifacts
+tests/testthat/Rplots*.pdf
+tests/testthat/*.pdf
+tests/testthat/*.png
+
+# OS files
+.DS_Store
+.DS_Store?
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# Editor / IDE
+*~
+*.swp
+*.swo
+.idea/
+.vscode/
+*.bak
+
+# Backup files from patching
+*.orig

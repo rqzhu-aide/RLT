@@ -1,38 +1,15 @@
-#' @title QuanForest
+#' @title Quantile Forest (Not Yet Implemented)
 #' @name QuanForest
-#' @description Internal function for fitting quantile forest
+#' @description Internal function for fitting quantile regression forest.
+#'   This feature is not yet implemented. Calling \code{RLT()} with
+#'   \code{model = "quantile"} will produce an informative error.
 #' @keywords internal
 
 QuanForest <- function(x, y, ncat,
-                       obs.w, var.w,
+                       obs.w, var.prob,
                        resample.preset,
                        param,
                        ...)
 {
-  # prepare y
-  storage.mode(y) <- "double"
-    
-    if (param$verbose > 0)
-      cat("Fitting Quantile Forest ... \n")
-      
-    # check splitting rules
-    all.split.rule = c("default")
-    param$"split.rule" <- match.arg(param$"split.rule", all.split.rule)
-    param$"split.rule" <- as.integer(match(param$"split.rule", all.split.rule))
-    
-    # fit single variable split model
-    fit = QuanUniForestFit(x, y, ncat,
-                          obs.w, var.w,
-                          resample.preset,
-                          param)
-    
-    fit[["parameters"]] = param
-    fit[["ncat"]] = ncat
-    fit[["obs.w"]] = obs.w
-    fit[["var.w"]] = var.w
-    fit[["y"]] = y
-    
-    class(fit) <- c("RLT", "fit", "quan", "uni", "single")
-
-    return(fit)
+  stop("Quantile forest is not yet implemented. Available models: regression, classification, survival.")
 }

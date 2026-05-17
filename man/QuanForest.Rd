@@ -2,11 +2,13 @@
 % Please edit documentation in R/QuanForest.r
 \name{QuanForest}
 \alias{QuanForest}
-\title{QuanForest}
+\title{Quantile Forest (Not Yet Implemented)}
 \usage{
-QuanForest(x, y, ncat, obs.w, var.w, resample.preset, param, ...)
+QuanForest(x, y, ncat, obs.w, var.prob, resample.preset, param, ...)
 }
 \description{
-Internal function for fitting quantile forest
+Internal function for fitting quantile regression forest.
+This feature is not yet implemented. Calling \code{RLT()} with
+\code{model = "quantile"} will produce an informative error.
 }
 \keyword{internal}

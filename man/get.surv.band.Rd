@@ -2,55 +2,56 @@
 % Please edit documentation in R/get.surv.band.r
 \name{get.surv.band}
 \alias{get.surv.band}
-\title{\if{html}{\out{<div class="sourceCode">}}\preformatted{      get.surv.band
-}\if{html}{\out{</div>}}}
+\title{get.surv.band}
 \usage{
 get.surv.band(
   x,
   i = 0,
   alpha = 0.05,
-  approach = "naive-mc",
+  approach = "naive",
   nsim = 5000,
-  r = 3,
-  bw = 1/2,
-  thre_order = 1,
+  k_rank = 10,
+  k_mode = c("fixed", "proportion"),
+  k_prop = 0.99,
   ...
 )
 }
 \arguments{
-\item{x}{A RLT prediction object. This must be an object calculated from a forest
-with \code{var.ready = TRUE}.}
+\item{x}{A RLT prediction object. Must be from a forest with var.mode != "none".}
 
-\item{i}{Observation number in the prediction. Default to calculate all (\eqn{i = 0})}
+\item{i}{Observation number in the prediction. Default to calculate all (i = 0).}
 
-\item{alpha}{alpha level for interval \eqn{(\alpha/2, 1 - \alpha/2)}}
+\item{alpha}{alpha level for interval (alpha/2, 1 - alpha/2).}
 
-\item{approach}{What approach is used to calculate the confidence band. Can be
+\item{approach}{Confidence band approach:
 \itemize{
-\item \code{naive-mc}: positive-definite projection of the covariance matrix.
-the confidence band is non-smooth
-\item \code{smoothed-mc}: use a smoothed marginal variance to perform the Monte Carlo
-approximation of the critical value. This is only recommended for large
-number of time points.
-\item \code{smoothed-lr}: use a smoothed low-rank approximation of the covariance
-matrix and apply an adaptive Bonferroni correction to derive the critical values.
-Note that this approach relies on the assumption of the smoothness and low rank of the
-covariance matrix.
+\item naive: marsd = sqrt(diag(Cov)), MC band using full covariance.
+\item smoothed: GAM-smoothed rank-K covariance + eigenvalue-ratio weighted residual correction.
 }}
 
-\item{nsim}{number of simulations for estimating the Monte Carlo critical value.
-Set this to be a large number. Default is 1000.}
+\item{nsim}{Number of simulations for estimating the Monte Carlo critical value.}
 
-\item{r}{maximum number of ranks used in the \code{smoothed-lr} approximation. Usually 5 is
-enough for approximating the covariance matrix due to smoothness.}
+\item{k_rank}{Rank truncation K used for the smooth low-rank covariance AND GAM basis size.}
 
-\item{bw}{bandwidth in the \code{ksmooth()} function for the kernel smoothing of standard deviation.
-Default is \eqn{n^{1/2}}, where \eqn{n} is the number of the time points.}
+\item{k_mode}{Rank selection mode: "fixed" (use k_rank) or "proportion" (auto-select by eigenvalue cumulative ratio).}
 
-\item{...}{...}
+\item{k_prop}{Proportion threshold (0,1] for cumulative eigenvalue ratio when k_mode = "proportion".}
+
+\item{...}{Further arguments (currently not used).}
 }
 \description{
-\if{html}{\out{<div class="sourceCode">}}\preformatted{Calculate the survival function (two-sided) confidence band from 
-             a RLT survival prediction. 
-}\if{html}{\out{</div>}}
+Calculate the survival function (two-sided) confidence band from a RLT survival prediction.
+}
+\examples{
+\donttest{
+  set.seed(42)
+  n <- 100
+  x <- matrix(rnorm(n * 5), ncol = 5)
+  y <- rexp(n, rate = exp(rowSums(x[, 1:2])))
+  censor <- rbinom(n, 1, 0.7)
+  fit <- RLT(x, y, censor = censor, model = "survival",
+             ntrees = 200, var.mode = "matched")
+  pred <- predict(fit, testx = x[1:3, ], var.est = TRUE)
+  band <- get.surv.band(pred, i = 1, alpha = 0.05)
+}
 }
