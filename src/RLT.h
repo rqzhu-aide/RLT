@@ -19,29 +19,42 @@
 //
 //    ----------------------------------------------------------------
 
+// RLT - Main Header File (Reorganized Structure)
+// This file provides the single entry point for all RLT includes
 
-//#define ARMA_USE_OPENMP
-//#define ARMA_NO_DEBUG
-//#define RLT_DEBUG
+#ifndef RLT_H
+#define RLT_H
 
-// header files
-# include "Utility/Utility.h"
-# include "Utility/Tree_Definition.h"
-# include "Utility/Tree_Function.h"
-# include "Utility/Stat_Function.h"
+// ============================================================================
+// Core Infrastructure (always required)
+// ============================================================================
+#include "include/core/Utility.h"
+#include "include/core/Tree_Definition.h"
+#include "include/core/Tree_Function.h"
+#include "include/core/Stat_Function.h"
+#include "include/core/Variance_IJ_Jack.h"
 
-// regression
-# include "RegUni/Reg_Uni_Definition.h"
-# include "RegUni/Reg_Uni_Function.h"
+// ============================================================================
+// Regression Module
+// ============================================================================
+#include "include/regression/Reg_Uni_Definition.h"
+#include "include/regression/Reg_Uni_Function.h"
 
-// classification
-# include "ClaUni/Cla_Uni_Definition.h"
-# include "ClaUni/Cla_Uni_Function.h"
+// ============================================================================
+// Classification Module
+// ============================================================================
+#include "include/classification/Cla_Uni_Definition.h"
+#include "include/classification/Cla_Uni_Function.h"
 
-// survival
-# include "SurvUni/Surv_Uni_Definition.h"
-# include "SurvUni/Surv_Uni_Function.h"
+// ============================================================================// Survival Module
+// ============================================================================
+#include "include/survival/Surv_Uni_Definition.h"
+#include "include/survival/Surv_Uni_Function.h"
 
-// quantile
-# include "QuanUni/Quan_Uni_Definition.h"
-# include "QuanUni/Quan_Uni_Function.h"
+// ============================================================================
+// Quantile Module
+// ============================================================================
+#include "include/quantile/Quan_Uni_Definition.h"
+#include "include/quantile/Quan_Uni_Function.h"
+
+#endif // RLT_H

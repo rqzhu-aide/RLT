@@ -1,0 +1,216 @@
+//  **********************************
+//  Reinforcement Learning Trees (RLT)
+//  Quantile
+//  **********************************
+
+// my header file
+# include "RLT.h"
+
+using namespace Rcpp;
+using namespace arma;
+
+void Quan_Uni_Forest_Build(const RLT_REG_DATA& REG_DATA,
+                          Reg_Uni_Forest_Class& REG_FOREST,
+                          const PARAM_GLOBAL& Param,
+                          const uvec& obs_id,
+                          const uvec& var_id,
+                          imat& ObsTrack,
+                          bool do_prediction,
+                          vec& Prediction,
+                          vec& OOBPrediction,
+                          vec& VarImp)
+{
+  // parameters to use
+  size_t ntrees = Param.ntrees;
+  bool replacement = Param.replacement;
+  size_t P = var_id.n_elem;
+  size_t N = obs_id.n_elem;
+  size_t size = (size_t) N*Param.resample_prob;
+  size_t nmin = Param.nmin;
+  bool importance = Param.importance;
+  bool reinforcement = Param.reinforcement;
+  size_t usecores = checkCores(Param.ncores, Param.verbose);
+  size_t seed = Param.seed;
+
+  // set seed
+  Rand rng(seed);
+  arma::uvec seed_vec = rng.rand_uvec(0, INT_MAX, ntrees);
+  
+  // track obs matrix
+  bool obs_track_pre = false;
+  
+  if (ObsTrack.n_elem != 0) //if pre-defined
+    obs_track_pre = true;
+  else
+    ObsTrack.zeros(N, ntrees);
+  
+  // Calculate predictions
+  uvec oob_count;
+  
+  if (do_prediction)
+  {
+    Prediction.zeros(N);
+    OOBPrediction.zeros(N);
+    oob_count.zeros(N);
+  }
+  
+  // importance
+  mat AllImp;
+    
+  if (importance)
+    AllImp.zeros(ntrees, P);
+
+  // thread-local storage for OOB accumulation
+  std::vector<vec> tl_Prediction(usecores);
+  std::vector<vec> tl_OOBPrediction(usecores);
+  std::vector<uvec> tl_oob_count(usecores);
+
+  #pragma omp parallel num_threads(usecores)
+  {
+    int tid = omp_get_thread_num();
+    
+    if (do_prediction)
+    {
+      tl_Prediction[tid].zeros(N);
+      tl_OOBPrediction[tid].zeros(N);
+      tl_oob_count[tid].zeros(N);
+    }
+
+    #pragma omp for schedule(dynamic)
+    for (size_t nt = 0; nt < ntrees; nt++) // fit all trees
+    {
+      // set xoshiro random seed
+      Rand rngl(seed_vec(nt));
+      
+      // get inbag and oobag index
+      uvec inbag_index, oobag_index;
+      
+      //If ObsTrack isn't given, set ObsTrack
+      if (!obs_track_pre)
+        set_obstrack(ObsTrack, nt, size, replacement, rngl);
+
+      // Find the samples from pre-defined ObsTrack
+      get_index(inbag_index, oobag_index, ObsTrack.unsafe_col(nt));
+      uvec inbag_id = obs_id(inbag_index);
+      uvec oobag_id = obs_id(oobag_index);
+
+      // initialize a tree (univariate split)
+      Reg_Uni_Tree_Class OneTree(REG_FOREST.SplitVarList(nt),
+                                 REG_FOREST.SplitValueList(nt),
+                                 REG_FOREST.LeftNodeList(nt),
+                                 REG_FOREST.RightNodeList(nt),
+                                 REG_FOREST.NodeWeightList(nt),
+                                 REG_FOREST.NodeAveList(nt));
+      
+      size_t TreeLength = 100 + size/nmin*3;
+      OneTree.initiate(TreeLength);
+
+      // build the tree
+      if (reinforcement)
+      {
+        uvec var_protect;
+        
+        Reg_Uni_Split_A_Node_Embed(0, OneTree, REG_DATA, 
+                                   Param, inbag_id, var_id, var_protect, rngl);
+      }else{
+        Quan_Uni_Split_A_Node(0, OneTree, REG_DATA, 
+                             Param, inbag_id, var_id, rngl);
+      }
+      
+      // trim tree 
+      TreeLength = OneTree.get_tree_length();
+      OneTree.trim(TreeLength);
+
+      // inbag and oobag predictions for all subjects
+      if (do_prediction)
+      {
+        uvec proxy_id = linspace<uvec>(0, N-1, N);
+        uvec TermNode(N, fill::zeros);
+      
+        Find_Terminal_Node(0, OneTree, REG_DATA.X, REG_DATA.Ncat, proxy_id, obs_id, TermNode);
+      
+        vec AllPred = OneTree.NodeAve(TermNode);
+      
+        // thread-local accumulation
+        tl_Prediction[tid] += AllPred;
+  
+        if (oobag_id.n_elem > 0)
+        {
+          for (size_t i = 0; i < N; i++)
+          {
+            if (ObsTrack(i, nt) == 0)
+            {
+              tl_OOBPrediction[tid](i) += AllPred(i);
+              tl_oob_count[tid](i) += 1;
+            }
+          }
+        }
+      }
+
+      // calculate importance 
+      
+      if (importance and oobag_id.n_elem > 1)
+      {
+        uvec AllVar = conv_to<uvec>::from(unique( OneTree.SplitVar( find( OneTree.SplitVar >= 0 ) ) ));
+        
+        size_t NTest = oobag_id.n_elem;
+        
+        vec oobY = REG_DATA.Y(oobag_id);
+        
+        uvec proxy_id = linspace<uvec>(0, NTest-1, NTest);
+        uvec TermNode(NTest, fill::zeros);
+        
+        Find_Terminal_Node(0, OneTree, REG_DATA.X, REG_DATA.Ncat, proxy_id, oobag_id, TermNode);
+        
+        vec oobpred = OneTree.NodeAve(TermNode);
+        
+        double baseImp = mean(square(oobY - oobpred));
+        
+        for (size_t j = 0; j < P; j++)
+        {
+          size_t suffle_var_j = var_id(j);
+          
+          if (!any(AllVar == suffle_var_j))
+            continue;
+
+          uvec proxy_id = linspace<uvec>(0, NTest-1, NTest);
+          uvec TermNode(NTest, fill::zeros);
+          
+          uvec oob_ind = rngl.shuffle(oobag_id);
+          vec tildex = REG_DATA.X.col(suffle_var_j);
+          tildex = tildex.elem( oob_ind );  //shuffle( REG_DATA.X.unsafe_col(j).elem( oobagObs ) );
+          
+          Find_Terminal_Node_ShuffleJ(0, OneTree, REG_DATA.X, REG_DATA.Ncat, proxy_id, oobag_id, TermNode, tildex, suffle_var_j);
+          
+          // get prediction
+          vec oobpred = OneTree.NodeAve(TermNode);
+          
+          // record
+          AllImp(nt, j) =  mean(square(oobY - oobpred)) - baseImp;
+        }
+      }
+    }
+  }
+  
+  if (do_prediction)
+  {
+    // merge thread-local results
+    Prediction.zeros(N);
+    OOBPrediction.zeros(N);
+    oob_count.zeros(N);
+    for (size_t t = 0; t < usecores; t++)
+    {
+      Prediction += tl_Prediction[t];
+      OOBPrediction += tl_OOBPrediction[t];
+      oob_count += tl_oob_count[t];
+    }
+    
+    Prediction /= ntrees;
+    // normalize OOB only where oob_count > 0
+    uvec valid = find(oob_count > 0);
+    OOBPrediction(valid) = OOBPrediction(valid) / oob_count(valid);
+  }  
+  
+  if (importance)
+    VarImp = mean(AllImp, 0).t();
+}

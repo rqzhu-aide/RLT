@@ -8,6 +8,7 @@
   object,
   testx = NULL,
   var.est = FALSE,
+  var.mode = NULL,
   keep.all = FALSE,
   ncores = 1,
   verbose = 0,
@@ -21,10 +22,18 @@
 \item{testx}{The testing samples, must have the same structure as the training samples}
 
 \item{var.est}{Whether to estimate the variance of each testing data.
-The original forest must be fitted with \code{var.ready = TRUE}.
+The original forest must be fitted with \code{var.mode != "none"}.
 For survival forests, calculates the covariance matrix over all
 observed time points and calculates critical value for the confidence
 band.}
+
+\item{var.mode}{Variance estimation mode for prediction. Can be \code{"none"},
+\code{"matched"}, \code{"IJ"}, or \code{"jack"}. If \code{NULL}
+(default), uses the mode from the fitted object. Only used when
+\code{var.est = TRUE}. \code{"matched"} requires the forest to be
+fitted with \code{var.mode = "matched"}. \code{"IJ"} and \code{"jack"}
+require the forest to have been fitted with resample tracking
+(automatically enabled when using IJ or jack variance).}
 
 \item{keep.all}{whether to keep the prediction from all trees. Warning: this can
 occupy a large storage space, especially in survival model}
@@ -45,7 +54,7 @@ A \code{RLT} prediction object, constructed as a list consisting
 
 \item{Prediction}{Prediction}
 \item{Variance}{if \code{var.est = TRUE} and the fitted object is
-\code{var.ready = TRUE}}
+\code{var.mode != "none"}}
 
 \strong{For Survival Forests}
 \item{hazard}{predicted hazard functions}
@@ -56,29 +65,39 @@ observation and each tree}
 \item{AllCHF}{if \code{keep.all = TRUE}, the predicted cumulative hazard function for each
 observation and each tree}
 \item{Cov}{if \code{var.est = TRUE} and the fitted object is
-\code{var.ready = TRUE}. For each test subject, a matrix of size NFail\eqn{\times}NFail
+\code{var.mode != "none"}. For each test subject, a matrix of size NFail\eqn{\times}NFail
 where NFail is the number of observed failure times in the training data}
 \item{Var}{if \code{var.est = TRUE} and the fitted object is
-\code{var.ready = TRUE}. Marginal variance for each subject}
+\code{var.mode != "none"}. Marginal variance for each subject}
 \item{timepoints}{ordered observed failure times from the training data}
 \item{MarginalVar}{if \code{var.est = TRUE} and the fitted object is
-\code{var.ready = TRUE}. Marginal variance for each subject
+\code{var.mode != "none"}. Marginal variance for each subject
 from the Cov matrix projected to the nearest positive definite
 matrix}
 \item{MarginalVarSmooth}{if \code{var.est = TRUE} and the fitted object is
-\code{var.ready = TRUE}. Marginal variance for each subject
+\code{var.mode != "none"}. Marginal variance for each subject
 from the Cov matrix projected to the nearest positive definite
 matrix and then smoothed using Gaussian kernel smoothing}
 \item{CVproj}{if \code{var.est = TRUE} and the fitted object is
-\code{var.ready = TRUE}. Critical values to calculate confidence bands around
+\code{var.mode != "none"}. Critical values to calculate confidence bands around
 cumulative hazard predictions at several confidence levels. Calculated using
 \code{MarginalVar}}
 \item{CVprojSmooth}{if \code{var.est = TRUE} and the fitted object is
-\code{var.ready = TRUE}. Critical values to calculate confidence bands around
+\code{var.mode != "none"}. Critical values to calculate confidence bands around
 cumulative hazard predictions at several confidence levels. Calculated using
 \code{MarginalVarSmooth}}
 }
 \description{
 Predict the outcome (regression, classification or survival)
 using a fitted RLT object
+}
+\examples{
+\donttest{
+  set.seed(42)
+  x <- matrix(rnorm(300 * 5), ncol = 5)
+  y <- rowSums(x[, 1:2]) + rnorm(300)
+  fit <- RLT(x, y, ntrees = 100)
+  pred <- predict(fit, testx = x[1:5, ])
+  print(pred$Prediction)
+}
 }

@@ -2,8 +2,7 @@
 % Please edit documentation in R/forest.kernel.r
 \name{forest.kernel}
 \alias{forest.kernel}
-\title{\if{html}{\out{<div class="sourceCode">}}\preformatted{      random forest kernel
-}\if{html}{\out{</div>}}}
+\title{random forest kernel}
 \usage{
 forest.kernel(
   object,
@@ -43,4 +42,14 @@ A kernel matrix that contains kernel weights for each observation in \code{X1} w
              or between any two sets of data. This is an experimental feature.
              Use at your own risk.
 }\if{html}{\out{</div>}}
+}
+\examples{
+\donttest{
+  set.seed(42)
+  x <- matrix(rnorm(200 * 5), ncol = 5)
+  y <- rowSums(x[, 1:2]) + rnorm(200)
+  fit <- RLT(x, y, ntrees = 100)
+  K <- forest.kernel(fit, X1 = x[1:5, ])
+  print(K$Kernel[1:3, 1:3])
+}
 }

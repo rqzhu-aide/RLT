@@ -1,0 +1,27 @@
+---
+title: "RLT Classification Tutorial"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{RLT Classification Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+Placeholder content.
+
+```{r setup}
+library(RLT)
+```
+
+# Basic Usage
+
+Placeholder.

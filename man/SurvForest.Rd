@@ -9,9 +9,9 @@ SurvForest(
   y,
   censor,
   ncat,
-  failcount,
+  time.grid.size,
   obs.w,
-  var.w,
+  var.prob,
   resample.preset,
   param,
   ...

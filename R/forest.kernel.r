@@ -1,4 +1,4 @@
-#' @title           random forest kernel
+#' @title random forest kernel
 #' @description     Get random forest induced kernel weight matrix of testing samples 
 #'                  or between any two sets of data. This is an experimental feature.
 #'                  Use at your own risk.
@@ -26,6 +26,15 @@
 #' @return A kernel matrix that contains kernel weights for each observation in \code{X1} with respect to \code{X1}
 #' 
 #' @export
+#' @examples
+#' \donttest{
+#'   set.seed(42)
+#'   x <- matrix(rnorm(200 * 5), ncol = 5)
+#'   y <- rowSums(x[, 1:2]) + rnorm(200)
+#'   fit <- RLT(x, y, ntrees = 100)
+#'   K <- forest.kernel(fit, X1 = x[1:5, ])
+#'   print(K$Kernel[1:3, 1:3])
+#' }
 
 forest.kernel <- function(object,
                           X1 = NULL,
@@ -34,11 +43,11 @@ forest.kernel <- function(object,
                           verbose = FALSE,
                           ...)
 {
-  if( class(object)[2] != "fit" )
+  if( class(object)[[2]] != "fit" )
     stop("object must be a fitted RLT object")
 
   if (is.null(X1))
-    stop("self-kernel is not implemented yet.")
+    stop("X1 must be provided. To compute the kernel on training data, pass the training data as X1 and set X2 = NULL.")
 
   if (!is.matrix(X1) & !is.data.frame(X1)) stop("X1 must be a matrix or a data.frame")
 

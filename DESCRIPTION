@@ -1,7 +1,8 @@
 Package: RLT
 Type: Package
 Title: Reinforcement Learning Trees
-Version: 4.2.6
+Version: 6.0.2
+Date: 2026-05-16
 Authors@R: c(
     person("Ruoqing", "Zhu",
            email = "teazrq@gmail.com", 
@@ -21,18 +22,26 @@ Authors@R: c(
            role = c("ctb"))
     )
 Description: Random forest with a variety of additional features for regression, 
-             classification, survival analysis and graphical model. New features 
-             include parallel computing with OpenMP, reproduciblity with random 
-             seeds, variance and confidence band estimations, embedded model 
-             for selecting splitting varibles and constructing linear combination 
-             splits, observaton and variable weights, setting and tracking subjects 
-             used in each tree, etc.
-License: GPL (>= 2)
+             classification, and survival analysis. Features include parallel 
+             computing with OpenMP, reproducibility with random seeds, variance 
+             and confidence band estimations using U-statistics, embedded model 
+             for selecting splitting variables and constructing linear combination 
+             splits, permutation and distribution-based variable importance, 
+             observation and variable weights, and subject tracking across trees.
+Author: Ruoqing Zhu [aut, cre, cph] (<https://orcid.org/0000-0002-0753-5716>),
+  Sarah Formentini [aut],
+  Haowen Zhou [ctb],
+  Tianning Xu [ctb],
+  Zhechao Huang [ctb]
+Maintainer: Ruoqing Zhu <teazrq@gmail.com>
+Suggests: testthat, knitr, mgcv
+VignetteBuilder: knitr
+License: GPL (>= 3)
 Encoding: UTF-8
-LazyData: TRUE
-Imports: Rcpp (>= 1.0.9), stats, utils, Matrix, orthoDr, glmnet
+Imports: Rcpp (>= 1.0.9), stats
 LinkingTo: Rcpp, RcppArmadillo, dqrng, BH, sitmo
+BugReports: https://github.com/teazrq/RLT/issues
 URL: https://cran.r-project.org/package=RLT,
      https://teazrq.github.io/RLT/
-RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.0.0

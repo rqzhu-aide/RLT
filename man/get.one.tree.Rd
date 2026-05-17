@@ -16,3 +16,12 @@ get.one.tree(x, tree = 1, ...)
 \description{
 Print a single fitted tree from a forest object
 }
+\examples{
+\donttest{
+  set.seed(42)
+  x <- matrix(rnorm(300 * 5), ncol = 5)
+  y <- rowSums(x[, 1:2]) + rnorm(300)
+  fit <- RLT(x, y, ntrees = 50)
+  get.one.tree(fit, tree = 1)
+}
+}

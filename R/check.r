@@ -1,6 +1,3 @@
-#' @title check_ntrees
-#' @name check_ntrees
-#' @keywords internal
 check_ntrees <- function(ntrees)
 {
   storage.mode(ntrees) <- "integer"
@@ -14,9 +11,6 @@ check_ntrees <- function(ntrees)
   return(ntrees)
 }
 
-#' @title check_mtry
-#' @name check_mtry
-#' @keywords internal
 check_mtry <- function(mtry, p)
 {
   storage.mode(mtry) <- "integer"
@@ -33,9 +27,6 @@ check_mtry <- function(mtry, p)
   return(mtry)
 }
 
-#' @title check_nmin
-#' @name check_nmin
-#' @keywords internal
 check_nmin <- function(nmin)
 {
   storage.mode(nmin) <- "integer"
@@ -49,24 +40,7 @@ check_nmin <- function(nmin)
   return(nmin)
 }
 
-#' @title check_splitgen
-#' @name check_splitgen
-#' @keywords internal
-check_splitgen <- function(split.gen)
-{
-  split.gen.num = match(split.gen, c("random", "rank", "best"), 
-                        nomatch = 0)
-  
-  if (split.gen.num == 0) 
-    stop(paste("split.gen = ", split.gen, " is not recognized", sep = ""))
-  
-  storage.mode(split.gen.num) <- "integer"
-  return(split.gen.num)
-}
 
-#' @title check_nsplit
-#' @name check_nsplit
-#' @keywords internal
 check_nsplit <- function(nsplit)
 {
   storage.mode(nsplit) <- "integer"
@@ -75,14 +49,11 @@ check_nsplit <- function(nsplit)
     stop("nsplit should be numerical")
   
   if (nsplit < 0)
-    stop("nsplit cannot be less than 1")
+    stop("nsplit cannot be less than 0")
   
   return(nsplit)
 }
 
-#' @title check_resamplereplace
-#' @name check_resamplereplace
-#' @keywords internal
 check_resamplereplace <- function(resample.replace)
 {
   storage.mode(resample.replace) <- "integer"
@@ -94,9 +65,6 @@ check_resamplereplace <- function(resample.replace)
   return(resample.replace)
 }
 
-#' @title check_resampleprob
-#' @name check_resampleprob
-#' @keywords internal
 check_resampleprob <- function(resample.prob)
 {
   storage.mode(resample.prob) <- "double"  
@@ -110,9 +78,6 @@ check_resampleprob <- function(resample.prob)
   return(resample.prob)
 }
 
-#' @title check_obsw
-#' @name check_obsw
-#' @keywords internal
 check_obsw <- function(obs.w, n)
 {
   obs.w = as.numeric(as.vector(obs.w))
@@ -132,29 +97,24 @@ check_obsw <- function(obs.w, n)
   return(obs.w)
 }
 
-#' @title check_varw
-#' @name check_varw
-#' @keywords internal
-check_varw <- function(var.w, p)
+check_varprob <- function(var.prob, p)
 {
-  var.w = as.numeric(as.vector(var.w))
+  var.prob = as.numeric(as.vector(var.prob))
 
-  if (any(is.na(var.w)))
-    stop("variable weights (var.w) should be numerical")
+  if (any(is.na(var.prob)))
+    stop("variable probabilities (var.prob) should be numerical")
   
-  if (any(var.w < 0))
-    stop("variable weights (var.w) cannot be negative")
+  if (any(var.prob < 0))
+    stop("variable probabilities (var.prob) cannot be negative")
   
-  if (length(var.w) != p)
-    stop("length of variable weights (var.w) must be p")
+  if (length(var.prob) != p)
+    stop("length of variable probabilities (var.prob) must be p")
   
-  storage.mode(var.w) <- "double"
-  var.w = var.w/sum(var.w)
+  storage.mode(var.prob) <- "double"
+  var.prob = var.prob/sum(var.prob)
+  return(var.prob)
 }
 
-#' @title check_importance
-#' @name check_importance
-#' @keywords internal
 check_importance <- function(importance)
 {
   importance.num = -1
@@ -176,9 +136,6 @@ check_importance <- function(importance)
 }
 
 
-#' @title check_reinforcement
-#' @name check_reinforcement
-#' @keywords internal
 check_reinforcement <- function(reinforcement)
 {
   storage.mode(reinforcement) <- "integer"
@@ -191,9 +148,6 @@ check_reinforcement <- function(reinforcement)
   return(reinforcement)
 }
 
-#' @title check_ncores
-#' @name check_ncores
-#' @keywords internal
 check_ncores <- function(ncores)
 {
   storage.mode(ncores) <- "integer"
@@ -207,9 +161,6 @@ check_ncores <- function(ncores)
   return(ncores)
 }
 
-#' @title check_verbose
-#' @name check_verbose
-#' @keywords internal
 check_verbose <- function(verbose)
 {
   storage.mode(verbose) <- "integer"
@@ -220,9 +171,6 @@ check_verbose <- function(verbose)
   return(verbose)
 }
 
-#' @title check_seed
-#' @name check_seed
-#' @keywords internal
 check_seed <- function(seed)
 {
   if (is.null(seed) | !is.numeric(seed))
@@ -236,9 +184,6 @@ check_seed <- function(seed)
   return(seed)
 }
 
-#' @title check_control
-#' @name check_control
-#' @keywords internal
 check_control <- function(control, param)
 {
   if (!is.list(control)) {
@@ -249,7 +194,7 @@ check_control <- function(control, param)
   
   # embed.ntrees
   if (is.null(control$embed.ntrees)) {
-    embed.ntrees <- 100
+    embed.ntrees <- 50
   } else embed.ntrees = max(control$embed.ntrees, 1)
   storage.mode(embed.ntrees) <- "integer"
   
@@ -265,18 +210,10 @@ check_control <- function(control, param)
   } else embed.nmin = max(1, floor(control$embed.nmin))
   storage.mode(embed.nmin) <- "integer"
   
-  # embed.split.gen
-  if (is.null(control$embed.split.gen)) {
-      embed.split.gen <- 1
-  } else embed.split.gen = match(control$embed.split.gen, 
-                                 c("random", "rank", "best"),
-                                 nomatch = 0)
-  storage.mode(embed.split.gen) <- "integer"
-  
-  # embed.nsplit
+  # embed.nsplit (determines split strategy: 0=best, >0=random)
   if (is.null(control$embed.nsplit)) {
-      embed.nsplit <- 1
-  } else embed.nsplit = max(1, control$embed.nsplit)
+      embed.nsplit <- 3
+  } else embed.nsplit = max(0, floor(control$embed.nsplit))
   storage.mode(embed.nsplit) <- "integer"
   
   # embed.resample.replace
@@ -298,7 +235,7 @@ check_control <- function(control, param)
   
   # embed.protect
   if (is.null(control$embed.protect)) {
-      embed.protect <- ceiling(2*log(param$n))
+      embed.protect <- ceiling(log(param$n))
   } else embed.protect = max(0, min(control$embed.protect, param$p))
   storage.mode(embed.protect) <- "integer"
 
@@ -321,7 +258,9 @@ check_control <- function(control, param)
   }
   storage.mode(linear.comb) <- "integer"  
   
-  # split.rule will be checked in each model
+  # linear.comb.method will be checked in each model
+  
+  # split.rule will be checked in each model (for classification/survival)
   
   # resample.track
   if (is.null(control$resample.track)) {
@@ -329,24 +268,20 @@ check_control <- function(control, param)
   } else resample.track = ifelse(control$resample.track != 0, 1L, 0L)
   storage.mode(resample.track) <- "integer"
   
-  # var.ready
-  if (is.null(control$var.ready)) {
-    var.ready <- 0
-  } else var.ready = max(0, min(control$var.ready, 2))
-  storage.mode(var.ready) <- "integer"
-
-  # alpha
-  if (is.null(control$alpha)) {
-    alpha <- 0
-  } else alpha = max(0, min(control$alpha, 0.5)) 
-  storage.mode(alpha) <- "double"
+  # var.mode
+  if (is.null(control$var.mode)) {
+    var.mode <- "none"
+  } else if (is.logical(control$var.mode)) {
+    var.mode <- ifelse(control$var.mode, "matched", "none")
+  } else {
+    var.mode <- match.arg(control$var.mode, c("none", "matched", "IJ", "jack"))
+  }
   
   # return new control
   return(list(# embedded model control
               "embed.ntrees" = embed.ntrees,
               "embed.mtry" = embed.mtry,
               "embed.nmin" = embed.nmin,
-              "embed.split.gen" = embed.split.gen,
               "embed.nsplit" = embed.nsplit,
               "embed.resample.replace" = embed.resample.replace,
               "embed.resample.prob" = embed.resample.prob,              
@@ -355,38 +290,20 @@ check_control <- function(control, param)
               "embed.threshold" = embed.threshold,
               # other parameters
               "linear.comb" = linear.comb,
+              "linear.comb.method" = control$linear.comb.method,
               "split.rule" = control$split.rule,
               "resample.track" = resample.track,
-              "var.ready" = var.ready,
-              "alpha" = alpha))
+              "var.mode" = var.mode))
 }
 
-#' @title check_resamplepreset
-#' @name check_resamplepreset
-#' @keywords internal
-check_resamplepreset <- function(resample.preset, param, param.control)
+check_resamplepreset <- function(resample.preset, param, param_control)
 {
 
   # for variance estimation
-  if (param.control$var.ready)
+  if (param_control$var.mode != "none")
   {
     k = as.integer(param$resample.prob*param$n)
     resample.preset = gen_ms_obs_track_mat_cpp(param$n, k, param$ntrees, param$seed + 1)
-
-    # construct the matrix with matched sampling
-    # resample.preset = matrix(0, param$n, param$ntrees)
-    # k = as.integer(param$resample.prob*param$n)
-    # 
-    # for (i in 1:as.integer(param$ntrees/2) )
-    # {
-    #   ab = sample(1:param$n, 2*k)
-    #   a = ab[1:k]
-    #   b = ab[-(1:k)]
-    #   
-    #   resample.preset[a, i] = 1
-    #   resample.preset[b, i+ (param$ntrees/2)] = 1
-    # }
-    
   }else{
     
     # check resample.preset
