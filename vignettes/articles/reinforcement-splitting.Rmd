@@ -117,6 +117,10 @@ barplot(RLTfit$VarImp, main = "RLT Variable Importance (Distributed)")
 ## Inspect one tree
 
 ```{r inspect-tree}
-# Look at the first tree structure
-get.one.tree(RLTfit, 1)
+# Preview the first few printed lines.
+tree_output <- capture.output(get.one.tree(RLTfit, 1))
+cat(head(tree_output, 14), sep = "\n")
+if (length(tree_output) > 14) {
+  cat("\n... output truncated ...\n")
+}
 ```

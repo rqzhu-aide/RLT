@@ -22,7 +22,7 @@ This vignette introduces survival analysis with **RLT** (Reinforcement Learning 
 - **Linear combination (LC) splits**: combine multiple variables into a single split direction.
 - **Variance estimation**: matched-sample U-statistic, infinitesimal jackknife (IJ), and jackknife.
 - **Confidence bands**: `get.surv.band()` provides naive or smoothed simultaneous bands for survival curves.
-- **Tree inspection**: `get.one.tree()` prints individual tree structures.
+- **Tree inspection**: `get.one.tree()` inspects individual tree structures.
 
 The examples below use small simulated datasets so that all code runs quickly.
 
@@ -237,17 +237,25 @@ length(pred_reduced$timepoints)  # <= 50 time points
 
 # Inspecting individual trees
 
-Use `get.one.tree()` to print the structure of any tree in the fitted forest. This is helpful for understanding how splits are made and for debugging.
+Use `get.one.tree()` to inspect the structure of any tree in the fitted forest. The preview below shows the first few printed lines so the tutorial stays compact.
 
 ```{r get-one-tree}
 # Standard (single-variable) survival tree
-get.one.tree(fit, tree = 1)
+tree_output <- capture.output(get.one.tree(fit, tree = 1))
+cat(head(tree_output, 14), sep = "\n")
+if (length(tree_output) > 14) {
+  cat("\n... output truncated ...\n")
+}
 ```
 
 For LC forests, `get.one.tree()` also shows the linear combination coefficients at each internal node:
 
 ```{r get-one-tree-lc}
-get.one.tree(fit_lc, tree = 1)
+tree_output <- capture.output(get.one.tree(fit_lc, tree = 1))
+cat(head(tree_output, 14), sep = "\n")
+if (length(tree_output) > 14) {
+  cat("\n... output truncated ...\n")
+}
 ```
 
 # Summary

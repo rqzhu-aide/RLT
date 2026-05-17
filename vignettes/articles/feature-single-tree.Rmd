@@ -91,10 +91,14 @@ fit <- RLT(
 
 ## Inspect one tree
 
-Use `get.one.tree(<fit>, <tree_id>)` to print a single tree.
+Use `get.one.tree(<fit>, <tree_id>)` to inspect a single tree.
 Choose `tree_id` from 1 to `ntrees` (here we take the first tree).
 
 ```{r inspect-tree}
-# Peek into a single tree
-get.one.tree(fit, 1)
+# Preview the first few printed lines.
+tree_output <- capture.output(get.one.tree(fit, 1))
+cat(head(tree_output, 14), sep = "\n")
+if (length(tree_output) > 14) {
+  cat("\n... output truncated ...\n")
+}
 ```
