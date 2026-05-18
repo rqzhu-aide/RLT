@@ -212,10 +212,11 @@ List SurvUniForestPred(arma::field<arma::ivec>& SplitVar,
       mat pred_i_hazard_reduced = pred_i_hazard_full.cols(mapping_indices);
       mat pred_i_survival_reduced = pred_i_survival_full.cols(mapping_indices);
 
-      // 4. Assign the mean of the reduced hazard and survival matrices to the output
+      // 4. Assign the mean hazard, then derive CHF and Survival consistently.
+      //    Survival = exp(-CHF) ensures the band exp(-CHF ± bandk) centers on Surv.
       Hazard.row(i) = mean(pred_i_hazard_reduced, 0);
-      Surv.row(i) = mean(pred_i_survival_reduced, 0);
       CHazard.row(i) = cumsum(Hazard.row(i));
+      Surv.row(i) = exp(-CHazard.row(i));
 
       // 5. Variance estimation using standalone functions
       //    Variance is computed on the CHF (cumulative hazard) scale,
