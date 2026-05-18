@@ -47,9 +47,14 @@ void Cla_Uni_Forest_Build(const RLT_CLA_DATA& CLA_DATA,
     ObsTrack.zeros(N, ntrees);
   
   // oob sample too small, turn off importance
-  // Only applies to non-replacement sampling (replacement always has ~36.8% OOB)
-  if (!replacement && N - size < 2)
-    importance = 0;
+  // permutation importance needs >= 2 OOB; distributed needs >= 1 OOB
+  if (!replacement && importance > 0)
+  {
+    if (importance == 1 && N - size < 2)
+      importance = 0;
+    else if (importance == 2 && N - size < 1)
+      importance = 0;
+  }
   
   // Calculate predictions
   
@@ -191,7 +196,7 @@ void Cla_Uni_Forest_Build(const RLT_CLA_DATA& CLA_DATA,
       }
 
       // probability variable importance
-      if (importance == 2 and NTest > 1)
+      if (importance == 2 and NTest > 0)
       {
         uvec oobY = CLA_DATA.Y(oobag_id);
         

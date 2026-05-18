@@ -47,9 +47,14 @@ void Surv_Uni_Forest_Build(const RLT_SURV_DATA& SURV_DATA,
     ObsTrack.zeros(N, ntrees);
   
   // oob sample too small, turn off importance
-  // Only applies to non-replacement sampling (replacement always has ~36.8% OOB)
-  if (!replacement && N - size < 2)
-    importance = 0;
+  // permutation importance needs >= 2 OOB; distributed needs >= 1 OOB
+  if (!replacement && importance > 0)
+  {
+    if (importance == 1 && N - size < 2)
+      importance = 0;
+    else if (importance == 2 && N - size < 1)
+      importance = 0;
+  }
   
   // 
   if (importance) do_prediction = true;
@@ -204,7 +209,7 @@ void Surv_Uni_Forest_Build(const RLT_SURV_DATA& SURV_DATA,
       }
       
       // probability variable importance (distribute)
-      if (importance == 2 and NTest > 1)
+      if (importance == 2 and NTest > 0)
       {
         // oob samples
         uvec oobY = SURV_DATA.Y(oobag_id);
