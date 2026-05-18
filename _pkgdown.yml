@@ -30,7 +30,7 @@ navbar:
           href: articles/feature-kernel.html
         - text: "Single Tree"
           href: articles/feature-single-tree.html
-        - text: "Confidence Interval and Confidence Band"
+        - text: "Survival Confidence Band"
           href: articles/confidence-interval.html
     - text: "Reference"
       href: reference/index.html
