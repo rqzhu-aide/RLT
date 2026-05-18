@@ -19,14 +19,13 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   message = FALSE, warning = FALSE,
-  fig.width = 9, fig.height = 7, out.width = "90%", fig.align = "center",
+  fig.width = 8, fig.height = 7, out.width = "90%", fig.align = "center",
   collapse = TRUE, class.source = "fold-show"
 )
 ```
 
 ```{r load-libs}
 library(RLT)
-library(ggplot2)
 ```
 
 ## Overview
@@ -89,57 +88,40 @@ RLTPred <- predict(fit, testX, var.est = TRUE, ncores = 1)
 
 Before constructing simultaneous bands, it is useful to look at pointwise intervals ($\pm 1.96 \times \text{SD}$ from the diagonal of the covariance matrix). These are **not** simultaneous — each time point is considered independently.
 
-```{r plot-helper}
-# Helper: build a data.frame for ggplot from one subject
-build_subject_df <- function(subject_id, pred, SurvMat = NULL, band_list = NULL) {
-  tp  <- pred$timepoints
-  S   <- as.numeric(pred$Survival[subject_id, ])
-  sdf <- data.frame(
-    time  = tp,
-    surv  = pmin(pmax(S, 0), 1),
-    lower_pw = pmin(pmax(S - qnorm(0.975) * sqrt(diag(pred$Cov[,, subject_id])), 0), 1),
-    upper_pw = pmin(pmax(S + qnorm(0.975) * sqrt(diag(pred$Cov[,, subject_id])), 0), 1)
-  )
+```{r pointwise-plot, fig.height=8}
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
+
+for (i in 1:ntest) {
+  tp  <- RLTPred$timepoints
+  S   <- pmin(pmax(as.numeric(RLTPred$Survival[i, ]), 0), 1)
+  sd_i <- sqrt(diag(RLTPred$Cov[,, i]))
+  pw_lower <- pmin(pmax(S - qnorm(0.975) * sd_i, 0), 1)
+  pw_upper <- pmin(pmax(S + qnorm(0.975) * sd_i, 0), 1)
+  truth <- as.numeric(SurvMat[i, ])
   
-  if (!is.null(SurvMat)) {
-    sdf$truth <- pmin(pmax(as.numeric(SurvMat[subject_id, ]), 0), 1)
-  }
+  # Plot estimate with shaded pointwise CI
+  plot(tp, S, type = "n", ylim = c(0, 1),
+       xlab = "Time", ylab = "Survival Probability",
+       main = paste("Subject", i))
   
-  if (!is.null(band_list)) {
-    sdf$lower_band <- pmin(pmax(as.numeric(band_list[[subject_id]]$lower), 0), 1)
-    sdf$upper_band <- pmin(pmax(as.numeric(band_list[[subject_id]]$upper), 0), 1)
-  }
+  # Shaded pointwise band
+  polygon(c(tp, rev(tp)), c(pw_lower, rev(pw_upper)),
+          col = rgb(0.7, 0.7, 0.7, 0.5), border = NA)
   
-  sdf
+  # Truth (dashed red)
+  lines(tp, truth, col = "#E41A1C", lwd = 2, lty = 2)
+  
+  # Estimate (step function, black)
+  lines(tp, S, type = "s", lwd = 2)
+  
+  legend("topright", legend = c("Estimated S(t)", "True S(t)", "Pointwise 95% CI"),
+         lty = c(1, 2, NA), lwd = c(2, 2, NA), col = c("black", "#E41A1C", NA),
+         fill = c(NA, NA, rgb(0.7, 0.7, 0.7, 0.5)),
+         border = c(NA, NA, NA),
+         bty = "n", cex = 0.8)
 }
-```
 
-```{r pointwise-plot, fig.width=10, fig.height=9}
-# Build data for all subjects
-plot_data <- do.call(rbind, lapply(1:ntest, function(i) {
-  d <- build_subject_df(i, RLTPred, SurvMat)
-  d$subject <- paste("Subject", i)
-  d
-}))
-
-ggplot(plot_data, aes(x = time)) +
-  facet_wrap(~ subject, nrow = 2, scales = "free_y") +
-  # Pointwise band (shaded)
-  geom_ribbon(aes(ymin = lower_pw, ymax = upper_pw),
-              fill = "grey80", alpha = 0.6) +
-  # Truth
-  geom_line(aes(y = truth, colour = "True S(t)"), linewidth = 0.9, linetype = "dashed") +
-  # Estimate
-  geom_step(aes(y = surv, colour = "Estimated S(t)"), linewidth = 0.9) +
-  scale_colour_manual(name = NULL,
-                      values = c("True S(t)" = "#E41A1C", "Estimated S(t)" = "#222222")) +
-  scale_y_continuous(limits = c(0, 1), expand = c(0.01, 0.01)) +
-  labs(x = "Time", y = "Survival Probability",
-       title = "Pointwise 95% Confidence Intervals") +
-  theme_minimal(base_size = 13) +
-  theme(legend.position = "bottom",
-        panel.grid.minor = element_blank(),
-        strip.text = element_text(face = "bold"))
+par(mfrow = c(1, 1))
 ```
 
 ## Simultaneous confidence band
@@ -150,35 +132,49 @@ ggplot(plot_data, aes(x = time)) +
 SurvBand <- get.surv.band(RLTPred, alpha = 0.05, approach = "smoothed", k_rank = 10)
 ```
 
-```{r band-plot, fig.width=10, fig.height=9}
-plot_band <- do.call(rbind, lapply(1:ntest, function(i) {
-  d <- build_subject_df(i, RLTPred, SurvMat, SurvBand)
-  d$subject <- paste("Subject", i)
-  d
-}))
+```{r band-plot, fig.height=8}
+par(mfrow = c(2, 2), mar = c(4, 4, 3, 1))
 
-ggplot(plot_band, aes(x = time)) +
-  facet_wrap(~ subject, nrow = 2, scales = "free_y") +
-  # Simultaneous band (blue shading)
-  geom_ribbon(aes(ymin = lower_band, ymax = upper_band),
-              fill = "#3B82F6", alpha = 0.25) +
-  # Pointwise band (grey shading, for comparison)
-  geom_ribbon(aes(ymin = lower_pw, ymax = upper_pw),
-              fill = "grey70", alpha = 0.3) +
-  # Truth
-  geom_line(aes(y = truth, colour = "True S(t)"), linewidth = 0.9, linetype = "dashed") +
-  # Estimate
-  geom_step(aes(y = surv, colour = "Estimated S(t)"), linewidth = 0.9) +
-  scale_colour_manual(name = NULL,
-                      values = c("True S(t)" = "#E41A1C", "Estimated S(t)" = "#222222")) +
-  scale_y_continuous(limits = c(0, 1), expand = c(0.01, 0.01)) +
-  labs(x = "Time", y = "Survival Probability",
-       title = "Smoothed Covariance — 95% Simultaneous Confidence Band",
-       subtitle = "Grey = pointwise CI; Blue = simultaneous band") +
-  theme_minimal(base_size = 13) +
-  theme(legend.position = "bottom",
-        panel.grid.minor = element_blank(),
-        strip.text = element_text(face = "bold"))
+for (i in 1:ntest) {
+  tp  <- RLTPred$timepoints
+  S   <- pmin(pmax(as.numeric(RLTPred$Survival[i, ]), 0), 1)
+  sd_i <- sqrt(diag(RLTPred$Cov[,, i]))
+  pw_lower <- pmin(pmax(S - qnorm(0.975) * sd_i, 0), 1)
+  pw_upper <- pmin(pmax(S + qnorm(0.975) * sd_i, 0), 1)
+  truth <- as.numeric(SurvMat[i, ])
+  
+  b_lower <- pmin(pmax(as.numeric(SurvBand[[i]]$lower), 0), 1)
+  b_upper <- pmin(pmax(as.numeric(SurvBand[[i]]$upper), 0), 1)
+  
+  plot(tp, S, type = "n", ylim = c(0, 1),
+       xlab = "Time", ylab = "Survival Probability",
+       main = paste("Subject", i))
+  
+  # Shaded simultaneous band (blue)
+  polygon(c(tp, rev(tp)), c(b_lower, rev(b_upper)),
+          col = rgb(0.23, 0.51, 0.96, 0.25), border = NA)
+  
+  # Shaded pointwise band (grey)
+  polygon(c(tp, rev(tp)), c(pw_lower, rev(pw_upper)),
+          col = rgb(0.7, 0.7, 0.7, 0.3), border = NA)
+  
+  # Truth (dashed red)
+  lines(tp, truth, col = "#E41A1C", lwd = 2, lty = 2)
+  
+  # Estimate (step function, black)
+  lines(tp, S, type = "s", lwd = 2)
+  
+  legend("topright",
+         legend = c("Estimated S(t)", "True S(t)",
+                    "Pointwise 95% CI", "Simultaneous 95% Band"),
+         lty = c(1, 2, NA, NA), lwd = c(2, 2, NA, NA),
+         col = c("black", "#E41A1C", NA, NA),
+         fill = c(NA, NA, rgb(0.7, 0.7, 0.7, 0.5), rgb(0.23, 0.51, 0.96, 0.4)),
+         border = c(NA, NA, NA, NA),
+         bty = "n", cex = 0.75)
+}
+
+par(mfrow = c(1, 1))
 ```
 
 ## (Optional) Proportion-selected smoothing
