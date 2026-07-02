@@ -1,3 +1,8 @@
+# RLT 6.1.1
+
+* CRAN submission cleanup: fixed vignette pre-building, DESCRIPTION fields,
+  man page examples, and C++ compiler warning.
+
 # RLT 6.1.0
 
 * Added OOB (out-of-bag) self-kernel to `forest.kernel()` via `oob = TRUE`.
